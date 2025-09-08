@@ -59,6 +59,14 @@ Yes, never click "Start Audio". But this energy isn't encouraged.
 
 According to [this issue](https://github.com/samhenrigold/LidAngleSensor/issues/12), building requires having Xcode installed. I've only tested this on Xcode 26. YMMV.
 
+## Installation
+
+Via Homebrew:
+
+```shell
+brew install lidanglesensor
+```
+
 ## Related projects
 
 - [Python library that taps into this sensor](https://github.com/tcsenpai/pybooklid)
