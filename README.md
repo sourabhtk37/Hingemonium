@@ -25,7 +25,9 @@ Known problematic models:
 
 **Can I use this on my iMac?**
 
-Not yet tested. Feel free to slam your computer into your desk and make a PR with your results.
+~~Not yet tested. Feel free to slam your computer into your desk and make a PR with your results.~~
+
+[It totally works](https://github.com/samhenrigold/LidAngleSensor/issues/33). If it doesn't work for you, try slamming your computer harder?
 
 **Why?**
 
