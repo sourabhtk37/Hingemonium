@@ -1,6 +1,6 @@
 # Your MacBook is Now a Harmonium
 
-Hi, I'm Vedaant (you can find me as **rocktopus101** on GitHub). As a Computer Science grad student at USC, my MacBook is usually for compiling code, writing papers, and fueling a mild caffeine addiction. But I figured, why not make it musical?
+Hi, I'm Vedaant (or **rocktopus101** on GitHub). As a Computer Science grad student at USC, my MacBook is usually for compiling code, writing papers, and fueling a mild caffeine addiction. But I figured, why not make it musical?
 
 This app transforms your MacBook into a surprisingly fun and expressive harmonium. You play the notes on the keyboard, and in a stroke of what is either genius or madness, you **use the laptop's lid as the bellows to pump air**.
 
@@ -33,6 +33,10 @@ Does it have a lid you can flap? No? Then you might be out of luck. I suppose yo
 **Can I help?**
 Please do! Fork the repo, add a tabla machine, make it sound like a sitar, fix my questionable audio mixing—go wild.
 Right now, the code doesn't really work for piano style sharper notes so if you could make that work it would be great!
+
+**Why is the size so big?**
+It's the 40 high quality Harmonium sounds.
+
 
 ## Origins & Big Thanks
 
