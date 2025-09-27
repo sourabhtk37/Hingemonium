@@ -6,11 +6,6 @@
 //
 
 
-//
-//  KeyCaptureView.m
-//  LidAngleSensor
-//
-
 #import "KeyCaptureView.h"
 
 @implementation KeyCaptureView

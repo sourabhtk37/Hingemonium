@@ -50,8 +50,6 @@ static const int kKeyToMidiNote[] = {
     [self setupScales];
     [self updateLegend]; // Initial legend update
 
-    // --- REMOVED THE NSEvent LOCAL MONITOR ---
-
     // --- Start Update Timer ---
     self.updateTimer = [NSTimer scheduledTimerWithTimeInterval:0.02
                                                         target:self

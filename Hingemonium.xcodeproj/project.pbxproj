@@ -88,7 +88,7 @@
 		07B45F212E885FA300B96FA5 /* harmonium-g2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "harmonium-g2.wav"; sourceTree = "<group>"; };
 		07B45F222E885FA300B96FA5 /* harmonium-g3.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "harmonium-g3.wav"; sourceTree = "<group>"; };
 		07B45F232E885FA300B96FA5 /* harmonium-g4.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "harmonium-g4.wav"; sourceTree = "<group>"; };
-		EA6BE6462E6CA1E1003F66D4 /* LidAngleSensor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LidAngleSensor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA6BE6462E6CA1E1003F66D4 /* Hingemonium.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hingemonium.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -168,7 +168,7 @@
 		EA6BE6472E6CA1E1003F66D4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				EA6BE6462E6CA1E1003F66D4 /* LidAngleSensor.app */,
+				EA6BE6462E6CA1E1003F66D4 /* Hingemonium.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -176,9 +176,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		EA6BE6452E6CA1E1003F66D4 /* LidAngleSensor */ = {
+		EA6BE6452E6CA1E1003F66D4 /* Hingemonium */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = EA6BE6552E6CA1E1003F66D4 /* Build configuration list for PBXNativeTarget "LidAngleSensor" */;
+			buildConfigurationList = EA6BE6552E6CA1E1003F66D4 /* Build configuration list for PBXNativeTarget "Hingemonium" */;
 			buildPhases = (
 				EA6BE6422E6CA1E1003F66D4 /* Sources */,
 				EA6BE6432E6CA1E1003F66D4 /* Frameworks */,
@@ -191,11 +191,11 @@
 			fileSystemSynchronizedGroups = (
 				EA6BE6482E6CA1E1003F66D4 /* LidAngleSensor */,
 			);
-			name = LidAngleSensor;
+			name = Hingemonium;
 			packageProductDependencies = (
 			);
 			productName = LidAngleSensor;
-			productReference = EA6BE6462E6CA1E1003F66D4 /* LidAngleSensor.app */;
+			productReference = EA6BE6462E6CA1E1003F66D4 /* Hingemonium.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -212,7 +212,7 @@
 					};
 				};
 			};
-			buildConfigurationList = EA6BE6412E6CA1E1003F66D4 /* Build configuration list for PBXProject "LidAngleSensor" */;
+			buildConfigurationList = EA6BE6412E6CA1E1003F66D4 /* Build configuration list for PBXProject "Hingemonium" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -226,7 +226,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				EA6BE6452E6CA1E1003F66D4 /* LidAngleSensor */,
+				EA6BE6452E6CA1E1003F66D4 /* Hingemonium */,
 			);
 		};
 /* End PBXProject section */
@@ -414,6 +414,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				AUTOMATION_APPLE_EVENTS = NO;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -427,6 +428,8 @@
 				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Hingemonium;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -436,7 +439,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.5;
 				MARKETING_VERSION = 1.0.3;
-				PRODUCT_BUNDLE_IDENTIFIER = vedaantrajeshirke.LidAngleSensor;
+				PRODUCT_BUNDLE_IDENTIFIER = vedaantrajeshirke.Hingemonium;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
@@ -456,6 +459,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				AUTOMATION_APPLE_EVENTS = NO;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -469,6 +473,8 @@
 				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Hingemonium;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -478,7 +484,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.5;
 				MARKETING_VERSION = 1.0.3;
-				PRODUCT_BUNDLE_IDENTIFIER = vedaantrajeshirke.LidAngleSensor;
+				PRODUCT_BUNDLE_IDENTIFIER = vedaantrajeshirke.Hingemonium;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
@@ -495,7 +501,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		EA6BE6412E6CA1E1003F66D4 /* Build configuration list for PBXProject "LidAngleSensor" */ = {
+		EA6BE6412E6CA1E1003F66D4 /* Build configuration list for PBXProject "Hingemonium" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EA6BE6532E6CA1E1003F66D4 /* Debug */,
@@ -504,7 +510,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		EA6BE6552E6CA1E1003F66D4 /* Build configuration list for PBXNativeTarget "LidAngleSensor" */ = {
+		EA6BE6552E6CA1E1003F66D4 /* Build configuration list for PBXNativeTarget "Hingemonium" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EA6BE6562E6CA1E1003F66D4 /* Debug */,

@@ -27,7 +27,6 @@ static const int kNumberOfPlayers = 16;
     if (self) {
         _currentPlayerIndex = 0;
         _currentVolume = 0.0; // Start with no volume
-        // ... (rest of init remains the same)
         if (![self setupAudioEngine]) {
             NSLog(@"[HarmoniumAudioEngine] Failed to setup audio engine");
             return nil;

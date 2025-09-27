@@ -5,12 +5,6 @@
 //  Created by Vedaant Rajeshirke on 9/27/25.
 //
 
-
-//
-//  KeyCaptureView.h
-//  LidAngleSensor
-//
-
 #import <Cocoa/Cocoa.h>
 
 @class KeyCaptureView;
