@@ -11,7 +11,10 @@
 #import "NSLabel.h"
 #import "LidAngleSensor.h"
 #import "KeyCaptureView.h"
-
+typedef NS_ENUM(NSInteger, NoteNamingMode) {
+    NoteNamingModeWestern,
+    NoteNamingModeSargam
+};
 @interface AppDelegate : NSObject <NSApplicationDelegate, KeyCaptureViewDelegate>
 
 // Main Window
@@ -34,6 +37,8 @@
 @property (strong) NSLabel *angleLabel; // For showing the angle
 @property (strong) NSLabel *scaleLabel;
 @property (strong) NSPopUpButton *scalePopUpButton;
+@property (strong) NSLabel *notationLabel;
+@property (strong) NSPopUpButton *namingModePopUpButton; 
 @property (strong) NSLabel *legendLabel; // For the key map legend
 @property (strong) NSLabel *instructionsLabel;
 
@@ -41,6 +46,7 @@
 @property (strong) NSArray<NSString *> *availableScales;
 @property (strong) NSDictionary<NSString *, NSArray<NSNumber *> *> *scaleNoteMapping;
 @property (strong) NSString *currentScale;
+@property (nonatomic, assign) NoteNamingMode currentNamingMode;
 @property (strong) NSArray<NSNumber *> *mappedKeys; // To iterate keys in order
 
 @end

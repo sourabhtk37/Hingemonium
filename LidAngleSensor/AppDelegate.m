@@ -19,11 +19,11 @@ static const int kKeyToMidiNote[] = {
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // --- Window and Custom View Setup ---
-    self.window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 520, 380)
-                                              styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable)
-                                                backing:NSBackingStoreBuffered
-                                                  defer:NO];
-    
+    self.window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 520, 420)
+                                                  styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable)
+                                                    backing:NSBackingStoreBuffered
+                                                      defer:NO];
+
     // Create and set our custom view as the window's content view
     KeyCaptureView *keyView = [[KeyCaptureView alloc] initWithFrame:self.window.frame];
     keyView.delegate = self; // Set the delegate to self
@@ -38,7 +38,7 @@ static const int kKeyToMidiNote[] = {
     // --- Component Initialization ---
     self.harmoniumEngine = [[HarmoniumAudioEngine alloc] init];
     self.lidSensor = [[LidAngleSensor alloc] init];
-    
+    self.currentNamingMode = NoteNamingModeWestern;
     self.lastLidAngle = -1.0;
     self.lastUpdateTime = CACurrentMediaTime();
     self.airPressure = 0.0; // Start with no air
@@ -95,7 +95,16 @@ static const int kKeyToMidiNote[] = {
     [self.scalePopUpButton setTarget:self];
     [self.scalePopUpButton setAction:@selector(scaleDidChange:)];
     [self.scalePopUpButton setTranslatesAutoresizingMaskIntoConstraints:NO];
-    
+
+    self.notationLabel = [[NSLabel alloc] init];
+        self.notationLabel.stringValue = @"Notation:";
+        
+        self.namingModePopUpButton = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(0, 0, 200, 25) pullsDown:NO];
+        [self.namingModePopUpButton addItemsWithTitles:@[@"Western (C, D, E)", @"Sargam (Sa, Re, Ga)"]];
+        [self.namingModePopUpButton setTarget:self];
+        [self.namingModePopUpButton setAction:@selector(namingModeDidChange:)];
+        [self.namingModePopUpButton setTranslatesAutoresizingMaskIntoConstraints:NO];
+
     self.legendLabel = [[NSLabel alloc] init];
     [self.legendLabel setFont:[NSFont monospacedSystemFontOfSize:12 weight:NSFontWeightRegular]];
     self.legendLabel.stringValue = @"-";
@@ -106,11 +115,19 @@ static const int kKeyToMidiNote[] = {
     self.instructionsLabel.alignment = NSTextAlignmentCenter;
     
     // --- Add to View ---
-    for (NSView *view in @[self.titleLabel, self.angleLabel, self.scaleLabel, self.scalePopUpButton, self.legendLabel, self.instructionsLabel]) {
+    for (NSView *view in @[self.titleLabel, self.angleLabel, self.scaleLabel, self.scalePopUpButton, self.notationLabel, self.namingModePopUpButton, self.legendLabel, self.instructionsLabel]) {
         [contentView addSubview:view];
     }
 
     // --- Auto Layout ---
+    // Disable autoresizing mask translation to avoid conflicts with Auto Layout
+    [self.titleLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [self.angleLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [self.scaleLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [self.notationLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [self.legendLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [self.instructionsLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+
     [NSLayoutConstraint activateConstraints:@[
         [self.titleLabel.centerXAnchor constraintEqualToAnchor:contentView.centerXAnchor],
         [self.titleLabel.topAnchor constraintEqualToAnchor:contentView.topAnchor constant:20],
@@ -123,28 +140,48 @@ static const int kKeyToMidiNote[] = {
         
         [self.scalePopUpButton.centerYAnchor constraintEqualToAnchor:self.scaleLabel.centerYAnchor],
         [self.scalePopUpButton.leadingAnchor constraintEqualToAnchor:self.scaleLabel.trailingAnchor constant:10],
+        // Notation Selector Row (stacked below the scale selector)
+        [self.notationLabel.topAnchor constraintEqualToAnchor:self.scaleLabel.bottomAnchor constant:15],
+        [self.notationLabel.trailingAnchor constraintEqualToAnchor:self.scaleLabel.trailingAnchor],
         
-        [self.legendLabel.topAnchor constraintEqualToAnchor:self.scalePopUpButton.bottomAnchor constant:20],
+        [self.namingModePopUpButton.centerYAnchor constraintEqualToAnchor:self.notationLabel.centerYAnchor],
+        [self.namingModePopUpButton.leadingAnchor constraintEqualToAnchor:self.scalePopUpButton.leadingAnchor],
+        [self.namingModePopUpButton.trailingAnchor constraintEqualToAnchor:self.scalePopUpButton.trailingAnchor constant:20],
+        
+        [self.legendLabel.topAnchor constraintEqualToAnchor:self.namingModePopUpButton.bottomAnchor constant:24],
         [self.legendLabel.centerXAnchor constraintEqualToAnchor:contentView.centerXAnchor],
 
         [self.instructionsLabel.centerXAnchor constraintEqualToAnchor:contentView.centerXAnchor],
         [self.instructionsLabel.bottomAnchor constraintEqualToAnchor:contentView.bottomAnchor constant:-20]
     ]];
+    [self.window setFrame:NSMakeRect(0, 0, 680, 380) display:YES];
+       [self.window center];
+}
+
+- (void)namingModeDidChange:(NSPopUpButton *)sender {
+    self.currentNamingMode = (NoteNamingMode)sender.indexOfSelectedItem;
+    [self updateLegend];
 }
 
 - (void)setupScales {
-    self.availableScales = @[@"Chromatic", @"Major", @"Natural Minor", @"Minor Pentatonic"];
+    // Bilaval is the same as the Western Major scale
+    // Kafi is similar to the Dorian mode
+    // Bhairavi uses all flat (komal) notes except Sa and Pa
+    self.availableScales = @[@"Chromatic", @"Major / Bilaval Thaat", @"Natural Minor", @"Kafi Thaat", @"Bhairavi Thaat", @"Minor Pentatonic"];
     self.scaleNoteMapping = @{
-        @"Chromatic":        @[@0, @1, @2, @3, @4, @5, @6, @7, @8, @9, @10, @11],
-        @"Major":            @[@0, @2, @4, @5, @7, @9, @11],
-        @"Natural Minor":    @[@0, @2, @3, @5, @7, @8, @10],
-        @"Minor Pentatonic": @[@0, @3, @5, @7, @10]
+        @"Chromatic":             @[@0, @1, @2, @3, @4, @5, @6, @7, @8, @9, @10, @11],
+        @"Major / Bilaval Thaat": @[@0, @2, @4, @5, @7, @9, @11], // Sa, Re, Ga, Ma, Pa, Dha, Ni
+        @"Natural Minor":         @[@0, @2, @3, @5, @7, @8, @10],
+        @"Kafi Thaat":            @[@0, @2, @3, @5, @7, @9, @10], // Sa, Re, ga, Ma, Pa, Dha, ni
+        @"Bhairavi Thaat":        @[@0, @1, @3, @5, @7, @8, @10], // Sa, re, ga, Ma, Pa, dha, ni
+        @"Minor Pentatonic":      @[@0, @3, @5, @7, @10]
     };
     self.mappedKeys = @[@'z', @'s', @'x', @'d', @'c', @'v', @'g', @'b', @'h', @'n', @'j', @'m', @',', @'l', @'.'];
 
     [self.scalePopUpButton addItemsWithTitles:self.availableScales];
     self.currentScale = self.availableScales[0];
 }
+
 
 - (void)scaleDidChange:(NSPopUpButton *)sender {
     self.currentScale = sender.selectedItem.title;
@@ -249,14 +286,41 @@ static const int kKeyToMidiNote[] = {
     }
     return finalNote;
 }
-
 - (NSString *)noteNameForMidi:(int)midiNote {
     if (midiNote < 0) return @"-";
-    NSArray<NSString *> *names = @[@"C", @"C#", @"D", @"D#", @"E", @"F", @"F#", @"G", @"G#", @"A", @"A#", @"B"];
-    int octave = (midiNote / 12) - 1;
-    NSString *note = names[midiNote % 12];
-    return [NSString stringWithFormat:@"%@%d", note, octave];
+
+    if (self.currentNamingMode == NoteNamingModeSargam) {
+        // --- Sargam Naming Logic ---
+        // Let's assume C is our tonic (Sa)
+        int rootNoteC = 48;
+        int interval = (midiNote - rootNoteC) % 12;
+        if (interval < 0) interval += 12;
+
+        // Lowercase for Komal (flat), Uppercase for Shuddha (natural) or Tivra (sharp)
+        NSArray<NSString *> *sargamNames = @[
+            @"Sa", @"re", @"Re", @"ga", @"Ga", @"Ma", @"MA", @"Pa", @"dha", @"Dha", @"ni", @"Ni"
+        ];
+        NSString *note = sargamNames[interval];
+
+        // Add octave dots (Saptak)
+        int octave = midiNote / 12;
+        if (octave < 4) { // Mandra Saptak (Lower)
+            return [NSString stringWithFormat:@"%@̣", note]; // Dot below
+        } else if (octave > 4) { // Taar Saptak (Higher)
+            return [NSString stringWithFormat:@"%@̇", note]; // Dot above
+        } else { // Madhya Saptak (Middle)
+            return note;
+        }
+
+    } else {
+        // --- Western Naming Logic (Original) ---
+        NSArray<NSString *> *names = @[@"C", @"C#", @"D", @"D#", @"E", @"F", @"F#", @"G", @"G#", @"A", @"A#", @"B"];
+        int octave = (midiNote / 12) - 1;
+        NSString *note = names[midiNote % 12];
+        return [NSString stringWithFormat:@"%@%d", note, octave];
+    }
 }
+
 
 - (BOOL)handleKeyDown:(NSEvent *)event {
     if (event.isARepeat) return NO;
@@ -285,3 +349,4 @@ static const int kKeyToMidiNote[] = {
 }
 
 @end
+
