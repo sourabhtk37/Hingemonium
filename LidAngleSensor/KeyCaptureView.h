@@ -12,6 +12,7 @@
 // A protocol to delegate key events back to the controller (our AppDelegate)
 @protocol KeyCaptureViewDelegate <NSObject>
 - (void)keyCaptureView:(KeyCaptureView *)view didReceiveKeyDown:(NSEvent *)event;
+- (void)keyCaptureView:(KeyCaptureView *)view didReceiveKeyUp:(NSEvent *)event;
 @end
 
 @interface KeyCaptureView : NSView

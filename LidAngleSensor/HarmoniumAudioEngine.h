@@ -2,7 +2,7 @@
 //  HarmoniumAudioEngine.h
 //  LidAngleSensor
 //
-//  Created by Vedaant on 2025-09-27.
+//  Created by Vedaant Rajeshirke on 9/27/25.
 //
 
 #import <Foundation/Foundation.h>
@@ -15,7 +15,12 @@
 - (instancetype)init;
 - (void)startEngine;
 - (void)stopEngine;
+
+// Note control methods
 - (void)playNote:(int)midiNote;
+- (void)releaseNote:(int)midiNote;
+- (void)processFadesWithDeltaTime:(double)deltaTime;
+
 
 /**
  * Updates the volume of all playing notes.

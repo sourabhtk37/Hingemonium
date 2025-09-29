@@ -8,13 +8,17 @@
 #import "HarmoniumAudioEngine.h"
 
 static const int kNumberOfPlayers = 16;
+static const float kFadeOutRate = 2.5f; // Higher value = faster fade-out
 
 @interface HarmoniumAudioEngine ()
 @property (nonatomic, strong) AVAudioEngine *audioEngine;
 @property (nonatomic, strong) AVAudioMixerNode *mixerNode;
 @property (nonatomic, strong) NSMutableArray<AVAudioPlayerNode *> *playerPool;
-@property (nonatomic, assign) int currentPlayerIndex;
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, AVAudioPCMBuffer *> *noteBuffers;
+
+// Properties to track player state
+@property (nonatomic, strong) NSMutableDictionary<NSNumber *, AVAudioPlayerNode *> *activePlayers;
+@property (nonatomic, strong) NSMutableDictionary<NSNumber *, AVAudioPlayerNode *> *fadingPlayers;
 
 // Property to hold the current volume based on lid angle
 @property (nonatomic, assign) float currentVolume;
@@ -25,8 +29,10 @@ static const int kNumberOfPlayers = 16;
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _currentPlayerIndex = 0;
         _currentVolume = 0.0; // Start with no volume
+        _activePlayers = [NSMutableDictionary dictionary];
+        _fadingPlayers = [NSMutableDictionary dictionary];
+
         if (![self setupAudioEngine]) {
             NSLog(@"[HarmoniumAudioEngine] Failed to setup audio engine");
             return nil;
@@ -38,6 +44,7 @@ static const int kNumberOfPlayers = 16;
     }
     return self;
 }
+
 - (void)dealloc {
     [self stopEngine];
 }
@@ -139,35 +146,83 @@ static const int kNumberOfPlayers = 16;
     return self.audioEngine.isRunning;
 }
 
+- (AVAudioPlayerNode *)findAvailablePlayer {
+    NSSet *activePlayerSet = [NSSet setWithArray:self.activePlayers.allValues];
+    NSSet *fadingPlayerSet = [NSSet setWithArray:self.fadingPlayers.allValues];
+
+    for (AVAudioPlayerNode *player in self.playerPool) {
+        if (![activePlayerSet containsObject:player] && ![fadingPlayerSet containsObject:player]) {
+            return player;
+        }
+    }
+    NSLog(@"[HarmoniumAudioEngine] No available players!");
+    return nil;
+}
 
 - (void)playNote:(int)midiNote {
     AVAudioPCMBuffer *buffer = self.noteBuffers[@(midiNote)];
-    if (!buffer) {
-        NSLog(@"[HarmoniumAudioEngine] No sample found for MIDI note: %d", midiNote);
-        return;
+    if (!buffer) return;
+
+    // If the note is already being held, do nothing.
+    if (self.activePlayers[@(midiNote)]) return;
+    
+    // If the note was fading, stop it so we can re-use its player.
+    AVAudioPlayerNode *player = self.fadingPlayers[@(midiNote)];
+    if (player) {
+        [self.fadingPlayers removeObjectForKey:@(midiNote)];
+    } else {
+        // Otherwise, find a completely new player.
+        player = [self findAvailablePlayer];
     }
     
-    AVAudioPlayerNode *player = self.playerPool[self.currentPlayerIndex];
-    self.currentPlayerIndex = (self.currentPlayerIndex + 1) % kNumberOfPlayers;
+    if (!player) return; // No available players.
     
     [player stop];
     
-    // Set the initial volume WHEN the note starts playing
+    self.activePlayers[@(midiNote)] = player;
     player.volume = self.currentVolume;
     
-    [player scheduleBuffer:buffer atTime:nil options:AVAudioPlayerNodeBufferInterrupts completionHandler:nil];
+    // Loop the sample so it sustains like a real harmonium
+    // FIXED: Corrected typo from AVAudioPlayerNodeBufferLooping to AVAudioPlayerNodeBufferLoops
+    [player scheduleBuffer:buffer atTime:nil options:AVAudioPlayerNodeBufferLoops completionHandler:nil];
     [player play];
 }
 
+- (void)releaseNote:(int)midiNote {
+    AVAudioPlayerNode *player = self.activePlayers[@(midiNote)];
+    if (player) {
+        // Move the player from the active dictionary to the fading dictionary
+        [self.activePlayers removeObjectForKey:@(midiNote)];
+        self.fadingPlayers[@(midiNote)] = player;
+    }
+}
+
 - (void)updateVolume:(float)volume {
-    // Clamp the incoming value to be safe
     self.currentVolume = fmaxf(0.0f, fminf(1.0f, volume));
     
-    // Apply this new volume to all currently playing notes
-    for (AVAudioPlayerNode *player in self.playerPool) {
-        if (player.isPlaying) {
-            player.volume = self.currentVolume;
+    // Only apply the "air pressure" volume to actively held notes
+    for (AVAudioPlayerNode *player in self.activePlayers.allValues) {
+        player.volume = self.currentVolume;
+    }
+}
+
+- (void)processFadesWithDeltaTime:(double)deltaTime {
+    if (self.fadingPlayers.count == 0) return;
+    
+    float volumeDecrement = kFadeOutRate * (float)deltaTime;
+    NSMutableDictionary *finishedFading = [NSMutableDictionary dictionary];
+
+    [self.fadingPlayers enumerateKeysAndObjectsUsingBlock:^(NSNumber *midiNote, AVAudioPlayerNode *player, BOOL *stop) {
+        player.volume -= volumeDecrement;
+        if (player.volume <= 0.0f) {
+            [player stop];
+            finishedFading[midiNote] = player;
         }
+    }];
+    
+    // Clean up players that have finished fading so they can be re-used
+    if (finishedFading.count > 0) {
+        [self.fadingPlayers removeObjectsForKeys:finishedFading.allKeys];
     }
 }
 

@@ -22,10 +22,10 @@
     [self.delegate keyCaptureView:self didReceiveKeyDown:event];
 }
 
-// We don't need to do anything on key up, but you could add a delegate method
-// for it here if you wanted to stop notes from playing in the future.
+// This method is called when a key is released.
 - (void)keyUp:(NSEvent *)event {
-    // [self.delegate keyCaptureView:self didReceiveKeyUp:event];
+    // Pass the event to our delegate to handle the fade-out logic.
+    [self.delegate keyCaptureView:self didReceiveKeyUp:event];
 }
 
 @end

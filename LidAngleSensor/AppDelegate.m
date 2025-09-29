@@ -73,6 +73,19 @@ static const int kKeyToMidiNote[] = {
     }
 }
 
+- (void)keyCaptureView:(KeyCaptureView *)view didReceiveKeyUp:(NSEvent *)event {
+    NSString *keyStr = event.charactersIgnoringModifiers.lowercaseString;
+    if (keyStr.length == 0) return;
+    
+    char character = [keyStr characterAtIndex:0];
+    int midiNote = [self getMidiNoteForKey:character];
+    
+    if (midiNote > 0) {
+        // Tell the engine to start fading this note out
+        [self.harmoniumEngine releaseNote:midiNote];
+    }
+}
+
 
 - (void)setupUI {
     // IMPORTANT: Get the contentView which is now our KeyCaptureView
@@ -212,6 +225,8 @@ static const int kKeyToMidiNote[] = {
         return;
     }
 
+    [self.harmoniumEngine processFadesWithDeltaTime:deltaTime];
+    
     // --- 1. Calculate a SMOOTHED velocity for pumping ---
     double instantVelocity = fabs(angle - self.lastLidAngle) / deltaTime;
     
@@ -349,4 +364,3 @@ static const int kKeyToMidiNote[] = {
 }
 
 @end
-
