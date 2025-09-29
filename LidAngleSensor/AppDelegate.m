@@ -16,7 +16,6 @@ static const int kKeyToMidiNote[] = {
 };
 
 @implementation AppDelegate
-
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // --- Window and Custom View Setup ---
     self.window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 520, 420)
@@ -32,7 +31,6 @@ static const int kKeyToMidiNote[] = {
     [self.window setTitle:@"Hingemonium "];
     [self.window center];
     [self.window makeKeyAndOrderFront:nil];
-    // Make our custom view the first responder to ensure it gets key events
     [self.window makeFirstResponder:keyView];
 
     // --- Component Initialization ---
@@ -58,7 +56,6 @@ static const int kKeyToMidiNote[] = {
                                                        repeats:YES];
 }
 
-// This is the new delegate method that receives key presses
 - (void)keyCaptureView:(KeyCaptureView *)view didReceiveKeyDown:(NSEvent *)event {
     if (event.isARepeat) return;
     
@@ -81,14 +78,12 @@ static const int kKeyToMidiNote[] = {
     int midiNote = [self getMidiNoteForKey:character];
     
     if (midiNote > 0) {
-        // Tell the engine to start fading this note out
         [self.harmoniumEngine releaseNote:midiNote];
     }
 }
 
 
 - (void)setupUI {
-    // IMPORTANT: Get the contentView which is now our KeyCaptureView
     NSView *contentView = self.window.contentView;
 
     // --- Create UI Elements ---
@@ -110,36 +105,40 @@ static const int kKeyToMidiNote[] = {
     [self.scalePopUpButton setTranslatesAutoresizingMaskIntoConstraints:NO];
 
     self.notationLabel = [[NSLabel alloc] init];
-        self.notationLabel.stringValue = @"Notation:";
+    self.notationLabel.stringValue = @"Notation:";
         
-        self.namingModePopUpButton = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(0, 0, 200, 25) pullsDown:NO];
-        [self.namingModePopUpButton addItemsWithTitles:@[@"Western (C, D, E)", @"Sargam (Sa, Re, Ga)"]];
-        [self.namingModePopUpButton setTarget:self];
-        [self.namingModePopUpButton setAction:@selector(namingModeDidChange:)];
-        [self.namingModePopUpButton setTranslatesAutoresizingMaskIntoConstraints:NO];
+    self.namingModePopUpButton = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(0, 0, 200, 25) pullsDown:NO];
+    [self.namingModePopUpButton addItemsWithTitles:@[@"Western (C, D, E)", @"Sargam (Sa, Re, Ga)"]];
+    [self.namingModePopUpButton setTarget:self];
+    [self.namingModePopUpButton setAction:@selector(namingModeDidChange:)];
+    [self.namingModePopUpButton setTranslatesAutoresizingMaskIntoConstraints:NO];
+    
+    // NEW: Create the toggle switch and its label
+    self.airPressureToggleLabel = [[NSLabel alloc] init];
+    self.airPressureToggleLabel.stringValue = @"Max Air:";
+
+    self.airPressureToggle = [[NSSwitch alloc] init];
+    [self.airPressureToggle setTarget:self];
+    [self.airPressureToggle setAction:@selector(toggleDidChange:)];
+    [self.airPressureToggle setTranslatesAutoresizingMaskIntoConstraints:NO];
 
     self.legendLabel = [[NSLabel alloc] init];
     [self.legendLabel setFont:[NSFont monospacedSystemFontOfSize:12 weight:NSFontWeightRegular]];
     self.legendLabel.stringValue = @"-";
     
     self.instructionsLabel = [[NSLabel alloc] init];
-    self.instructionsLabel.stringValue = @"Move the lid to pump the bellows (air) and use the keyboard to play.";
-    
+    self.instructionsLabel.stringValue = @"Move the lid to pump the bellows or use the 'Max Air' toggle.";
     self.instructionsLabel.alignment = NSTextAlignmentCenter;
     
-    // --- Add to View ---
-    for (NSView *view in @[self.titleLabel, self.angleLabel, self.scaleLabel, self.scalePopUpButton, self.notationLabel, self.namingModePopUpButton, self.legendLabel, self.instructionsLabel]) {
+    // Add ALL views to the content view
+    for (NSView *view in @[self.titleLabel, self.angleLabel, self.scaleLabel, self.scalePopUpButton, self.notationLabel, self.namingModePopUpButton, self.airPressureToggleLabel, self.airPressureToggle, self.legendLabel, self.instructionsLabel]) {
         [contentView addSubview:view];
     }
 
     // --- Auto Layout ---
-    // Disable autoresizing mask translation to avoid conflicts with Auto Layout
-    [self.titleLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [self.angleLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [self.scaleLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [self.notationLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [self.legendLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [self.instructionsLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    for (NSView *view in @[self.titleLabel, self.angleLabel, self.scaleLabel, self.notationLabel, self.airPressureToggleLabel, self.legendLabel, self.instructionsLabel]) {
+        [view setTranslatesAutoresizingMaskIntoConstraints:NO];
+    }
 
     [NSLayoutConstraint activateConstraints:@[
         [self.titleLabel.centerXAnchor constraintEqualToAnchor:contentView.centerXAnchor],
@@ -153,24 +152,98 @@ static const int kKeyToMidiNote[] = {
         
         [self.scalePopUpButton.centerYAnchor constraintEqualToAnchor:self.scaleLabel.centerYAnchor],
         [self.scalePopUpButton.leadingAnchor constraintEqualToAnchor:self.scaleLabel.trailingAnchor constant:10],
-        // Notation Selector Row (stacked below the scale selector)
+        
         [self.notationLabel.topAnchor constraintEqualToAnchor:self.scaleLabel.bottomAnchor constant:15],
         [self.notationLabel.trailingAnchor constraintEqualToAnchor:self.scaleLabel.trailingAnchor],
         
         [self.namingModePopUpButton.centerYAnchor constraintEqualToAnchor:self.notationLabel.centerYAnchor],
         [self.namingModePopUpButton.leadingAnchor constraintEqualToAnchor:self.scalePopUpButton.leadingAnchor],
-        [self.namingModePopUpButton.trailingAnchor constraintEqualToAnchor:self.scalePopUpButton.trailingAnchor constant:20],
-        
-        [self.legendLabel.topAnchor constraintEqualToAnchor:self.namingModePopUpButton.bottomAnchor constant:24],
+        [self.namingModePopUpButton.trailingAnchor constraintEqualToAnchor:self.scalePopUpButton.trailingAnchor],
+
+        // NEW: Constraints for the toggle switch row
+        [self.airPressureToggleLabel.topAnchor constraintEqualToAnchor:self.notationLabel.bottomAnchor constant:15],
+        [self.airPressureToggleLabel.trailingAnchor constraintEqualToAnchor:self.notationLabel.trailingAnchor],
+        [self.airPressureToggle.centerYAnchor constraintEqualToAnchor:self.airPressureToggleLabel.centerYAnchor],
+        [self.airPressureToggle.leadingAnchor constraintEqualToAnchor:self.namingModePopUpButton.leadingAnchor],
+
+        // Adjust legend to be below the new toggle row
+        [self.legendLabel.topAnchor constraintEqualToAnchor:self.airPressureToggleLabel.bottomAnchor constant:24],
         [self.legendLabel.centerXAnchor constraintEqualToAnchor:contentView.centerXAnchor],
 
         [self.instructionsLabel.centerXAnchor constraintEqualToAnchor:contentView.centerXAnchor],
         [self.instructionsLabel.bottomAnchor constraintEqualToAnchor:contentView.bottomAnchor constant:-20]
     ]];
-    [self.window setFrame:NSMakeRect(0, 0, 680, 380) display:YES];
-       [self.window center];
+    [self.window setFrame:NSMakeRect(0, 0, 680, 420) display:YES];
+    [self.window center];
 }
 
+// NEW: Action method for the toggle switch
+- (void)toggleDidChange:(NSSwitch *)sender {
+    // The main logic is handled in the update loop.
+    // This just ensures the UI updates instantly when toggled.
+    [self update];
+}
+
+- (void)update {
+    if (!self.lidSensor.isAvailable && self.airPressureToggle.state == NSControlStateValueOff) {
+        self.angleLabel.stringValue = @"Sensor N/A";
+        // Set air pressure to 0 if sensor is unavailable and toggle is off
+        self.airPressure = 0.0;
+        [self.harmoniumEngine updateVolume:(float)self.airPressure];
+        return;
+    }
+    
+    double angle = [self.lidSensor lidAngle];
+    double currentTime = CACurrentMediaTime();
+    
+    // --- 2. Update Air Pressure Model ---
+    if (self.airPressureToggle.state == NSControlStateValueOn) {
+        // If the toggle is ON, force air pressure to 100%
+        self.airPressure = 1.0;
+    } else {
+        // Otherwise, use the existing lid sensor logic
+        if (angle < 0) {
+            self.angleLabel.stringValue = @"Read Error";
+            return;
+        }
+
+        if (self.lastLidAngle < 0) {
+            self.lastLidAngle = angle;
+            self.lastUpdateTime = currentTime;
+            return;
+        }
+
+        double deltaTime = currentTime - self.lastUpdateTime;
+        if (deltaTime <= 0 || deltaTime > 0.5) {
+            self.lastLidAngle = angle;
+            self.lastUpdateTime = currentTime;
+            return;
+        }
+
+        double instantVelocity = fabs(angle - self.lastLidAngle) / deltaTime;
+        double pumpFactor = 0.015;
+        self.airPressure += instantVelocity * pumpFactor;
+        
+        double decayRate = 0.5;
+        self.airPressure -= decayRate * deltaTime;
+        self.airPressure = fmax(0.0, fmin(1.0, self.airPressure));
+
+        // Save state for the next frame
+        self.lastLidAngle = angle;
+        self.lastUpdateTime = currentTime;
+    }
+
+    [self.harmoniumEngine processFadesWithDeltaTime:(currentTime - self.lastUpdateTime)];
+
+    // --- 3. Update UI and Audio Engine ---
+    self.angleLabel.stringValue = [NSString stringWithFormat:@"Angle: %.1f° | Air Pressure: %.0f%%", angle, self.airPressure * 100];
+    [self.harmoniumEngine updateVolume:(float)self.airPressure];
+
+    // This check ensures lastUpdateTime is always updated, even when toggled on
+    if (self.airPressureToggle.state == NSControlStateValueOff) {
+        self.lastUpdateTime = currentTime;
+    }
+}
 - (void)namingModeDidChange:(NSPopUpButton *)sender {
     self.currentNamingMode = (NoteNamingMode)sender.indexOfSelectedItem;
     [self updateLegend];
@@ -199,60 +272,6 @@ static const int kKeyToMidiNote[] = {
 - (void)scaleDidChange:(NSPopUpButton *)sender {
     self.currentScale = sender.selectedItem.title;
     [self updateLegend];
-}
-- (void)update {
-    if (!self.lidSensor.isAvailable) {
-        self.angleLabel.stringValue = @"Sensor N/A";
-        return;
-    }
-    double angle = [self.lidSensor lidAngle];
-    if (angle < 0) {
-        self.angleLabel.stringValue = @"Read Error";
-        return;
-    }
-
-    double currentTime = CACurrentMediaTime();
-    if (self.lastLidAngle < 0) {
-        self.lastLidAngle = angle;
-        self.lastUpdateTime = currentTime;
-        return;
-    }
-
-    double deltaTime = currentTime - self.lastUpdateTime;
-    if (deltaTime <= 0 || deltaTime > 0.5) {
-        self.lastLidAngle = angle;
-        self.lastUpdateTime = currentTime;
-        return;
-    }
-
-    [self.harmoniumEngine processFadesWithDeltaTime:deltaTime];
-    
-    // --- 1. Calculate a SMOOTHED velocity for pumping ---
-    double instantVelocity = fabs(angle - self.lastLidAngle) / deltaTime;
-    
-    // --- 2. Update Air Pressure Model ---
-    // PUMP: Lid movement adds air to the reservoir.
-    // The multiplier controls how quickly you can "fill" the bellows.
-    double pumpFactor = 0.015;
-    self.airPressure += instantVelocity * pumpFactor;
-    
-    // DECAY: Air pressure naturally and constantly depletes over time.
-    // This creates the smooth fade-out effect. A higher rate means faster decay.
-    double decayRate = 0.5; // Pressure depletes by 50% per second.
-    self.airPressure -= decayRate * deltaTime;
-
-    // CLAMP: Ensure pressure stays between 0.0 (empty) and 1.0 (full).
-    self.airPressure = fmax(0.0, fmin(1.0, self.airPressure));
-
-    // --- 3. Update UI and Audio Engine ---
-    self.angleLabel.stringValue = [NSString stringWithFormat:@"Angle: %.1f° | Air Pressure: %.0f%%", angle, self.airPressure * 100];
-    
-    // Send the final, smooth pressure value to the engine
-    [self.harmoniumEngine updateVolume:(float)self.airPressure];
-
-    // Save state for the next frame
-    self.lastLidAngle = angle;
-    self.lastUpdateTime = currentTime;
 }
 
 - (void)updateLegend {

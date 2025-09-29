@@ -1,20 +1,16 @@
-//
-//  AppDelegate.h
-//  LidAngleSensor
-//
-//  Created by Sam on 2025-09-06.
-//  Modified by Vedaant on 2025-09-27
-//
+// AppDelegate.h
 
 #import <Cocoa/Cocoa.h>
 #import "HarmoniumAudioEngine.h"
 #import "NSLabel.h"
 #import "LidAngleSensor.h"
 #import "KeyCaptureView.h"
+
 typedef NS_ENUM(NSInteger, NoteNamingMode) {
     NoteNamingModeWestern,
     NoteNamingModeSargam
 };
+
 @interface AppDelegate : NSObject <NSApplicationDelegate, KeyCaptureViewDelegate>
 
 // Main Window
@@ -38,9 +34,13 @@ typedef NS_ENUM(NSInteger, NoteNamingMode) {
 @property (strong) NSLabel *scaleLabel;
 @property (strong) NSPopUpButton *scalePopUpButton;
 @property (strong) NSLabel *notationLabel;
-@property (strong) NSPopUpButton *namingModePopUpButton; 
+@property (strong) NSPopUpButton *namingModePopUpButton;
 @property (strong) NSLabel *legendLabel; // For the key map legend
 @property (strong) NSLabel *instructionsLabel;
+
+// NEW: UI Elements for the air pressure toggle
+@property (strong) NSLabel *airPressureToggleLabel;
+@property (strong) NSSwitch *airPressureToggle;
 
 // State Management
 @property (strong) NSArray<NSString *> *availableScales;
