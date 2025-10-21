@@ -1,0 +1,34 @@
+name: Build Hingemonium
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Hingemonium.app
+        run: |
+          xcodebuild \
+            -project Hingemonium.xcodeproj \
+            -scheme Hingemonium \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            BUILD_DIR=$(pwd)/build
+          echo "Contents of build folder:"
+          find build -type f -maxdepth 3
+
+      - name: Upload Hingemonium.app (if found)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hingemonium-app
+          path: |
+            build/Release/Hingemonium.app
+            build/Hingemonium.app
+            build/Build/Products/Release/Hingemonium.app
+            */Release/Hingemonium.app
+          if-no-files-found: warn
+
